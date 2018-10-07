@@ -13,7 +13,7 @@ public class SettingServiceBean implements SettingService {
     @Override
     public void init() {
         try {
-            reader = new FileInputStream(new File("../CloudHost/src/main/resources/resources.properties"));
+            reader = new FileInputStream(new File("../Cloud/src/main/resources/resources.properties"));
             properties = new Properties();
             properties.load(reader);
         } catch (FileNotFoundException e) {
