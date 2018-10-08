@@ -41,7 +41,7 @@ public class AppServiceBean implements AppService {
         } catch (Exception e) {
             error = e;
             return false;
-        }
+        } // https://geekbrains.ru/posts/gamedev_books_part1
 
     }
 

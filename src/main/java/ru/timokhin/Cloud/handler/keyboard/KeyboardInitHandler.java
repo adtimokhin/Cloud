@@ -13,7 +13,7 @@ public class KeyboardInitHandler {
     @Inject
     private Event<KeyboardCommandEvent> keyboardCommandEvent;
     /**
-     * получив {@link KeyboardInitEvent} из {@link ru.timokhin.cloudHost.service.system.BootstrapServiceBean} , выводится приветственное сообщение и {@link KeyboardCommandEvent} срабатывает в {@linkplain KeyboardCommandHandler}**/
+     * получив {@link KeyboardInitEvent} из {@link ru.timokhin.Cloud.service.system.BootstrapServiceBean} , выводится приветственное сообщение и {@link KeyboardCommandEvent} срабатывает в {@linkplain KeyboardCommandHandler}**/
 
     public void observe(@Observes final KeyboardInitEvent event){
         System.out.println();
