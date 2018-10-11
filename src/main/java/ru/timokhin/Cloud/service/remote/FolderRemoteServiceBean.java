@@ -15,6 +15,8 @@ import javax.jcr.nodetype.NodeType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.jackrabbit.JcrConstants.NT_FOLDER;
+
 @ApplicationScoped
 public class FolderRemoteServiceBean implements FolderRemoteService {
     @Inject
@@ -28,31 +30,41 @@ public class FolderRemoteServiceBean implements FolderRemoteService {
 
     @Override
     public @NotNull List<String> getListFolderName() {
-        List<String> folders = new ArrayList<>();
-        if(appService.getRootNode() == null)return folders;
+        List<String> folderNames = new ArrayList<>();
+        if(!appService.status()){
+            System.out.println("Соединение с удаленным хранилищем не установленно");
+            return folderNames;
+        }
+        if (appService.getRootNode() == null) return folderNames;
         Node root = appService.getRootNode();
         try {
             NodeIterator ndi = root.getNodes();
-            while (ndi.hasNext()){
+            while (ndi.hasNext()) {
                 Node node = ndi.nextNode();
                 NodeType nodeType = node.getPrimaryNodeType();
-                boolean isFolder = nodeType.isNodeType("nt:folder");
-                if(isFolder)
-                    folders.add(node.getName());
+                 if(nodeType.isNodeType(NT_FOLDER)) // todo: разобраться, почему папки не подходят под NT_FOLDER
+                    folderNames.add(node.getName());
             }
-            return folders;
+            return folderNames;
         } catch (RepositoryException e) {
             System.out.println("root folder is empty");
-            return folders;
+            return folderNames;
         }
 
     }
 
     @Override
     public void getListNamesRoot() {
-        for (String name: getListFolderName()){
+        List<String> folderNames = getListFolderName();
+        if (folderNames.size() == 0) {
+            System.out.println("---EMPTY---");
+            return;
+        }
+        System.out.println("---");
+        for (String name : folderNames) {
             System.out.println(name);
         }
+        System.out.println("---");
     }
 
     @Override
@@ -72,6 +84,10 @@ public class FolderRemoteServiceBean implements FolderRemoteService {
 
     @Override
     public boolean exists(@Nullable String folderName) {
+        List<String> names = getListFolderName();
+        for (int i = 0; i < names.size(); i++) {
+            if(names.get(i).equals(folderName)) return true;
+        }
         return false;
     }
 }

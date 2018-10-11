@@ -1,5 +1,6 @@
 package ru.timokhin.Cloud.handler.keyboard;
 
+import org.jboss.weld.injection.spi.helpers.SimpleResourceReference;
 import ru.timokhin.Cloud.api.local.FileLocalService;
 import ru.timokhin.Cloud.api.local.FolderLocalService;
 import ru.timokhin.Cloud.api.remote.FileRemoteService;
@@ -39,42 +40,13 @@ public class KeyboardCommandHandler {
     private static final String FOLDER_SHRT = "fd";
     private static final String DELETE_SHRT = "dlt";
     private static final String READ_SHRT = "rd";
-    private static final String EXISTS_SHRT = "ext";
+    private static final String EXISTS_SHRT = "ex";
     private static final String LIST_SHRT = "lst";
-    private static final String EXIT_SHRT = "ex";
+    private static final String EXIT_SHRT = "ext";
     private static final String HELP_SHRT = "hlp";
-
-//    //команды вызова списка команд и их описания
-//    private static final String HELP_CMD = "help";
-//    private static final String ABBREVIATIONS_CMD = "abbr";
-//    // команда выхода из приложения
-//    private static final String EXIT_CMD = "exit";
-//    //команды входа/выхода из учетной записи
-//    private static final String LOGIN_CMD = "login";
-//    private static final String LOGOUT_CMD = "logout";
-//    // команды поиска элементов по локальному и удаленному хранилищу
-//    private static final String LOCAL_FILE_LIST_CMD = "local-file-list";
-//    private static final String LOCAL_FILE_EXISTS_CMD = "local-file-exists";
-//    private static final String LOCAL_FOLDER_LIST_CMD = "local-folder-list";
-//    private static final String LOCAL_FOLDER_EXISTS_CMD = "local-folder-exists";
-//    private static final String REMOTE_FILE_LIST_CMD = "remote-file-list";
-//    private static final String REMOTE_FILE_EXISTS_CMD = "remote-file-exists";
-//    private static final String REMOTE_FOLDER_LIST_CMD = "remote-folder-list";
-//    private static final String REMOTE_FOLDER_EXISTS_CMD = "remote-folder-exists";
-//    //команды изменения состояния папок/файлов в удаленом хранилище
-//    private static final String REMOTE_FOLDER_ADD_CMD = "remote-folder-add";
-//    private static final String REMOTE_FOLDER_DELETE_CMD = "remote-folder-delete";
-//    private static final String REMOTE_FILE_DELETE_CMD = "remote-file-delete";
-//    private static final String REMOTE_FILE_ADD_CMD = "remote-file-add";
-//    //команды изменения состояния папок/файлов в локальном хранилище
-//    private static final String LOCAL_FOLDER_ADD_CMD = "local-folder-add";
-//    private static final String LOCAL_FOLDER_DELETE_CMD = "local-folder-delete";
-//    private static final String LOCAL_FILE_DELETE_CMD = "local-file-delete";
-//    private static final String LOCAL_FILE_ADD_CMD = "local-file-add";
-//    //команды вывода содержимго файлов в консоль //todo: <- реализовать
-//    private static final String LOCAL_FILE_READ_CMD = "local-file-read";
-//    private static final String REMOTE_FILE_READ_CMD = "remote-file-read";
-
+    //todo: добавить в abbr()
+    private static final String LOGIN_SHRT = "lgi";
+    private static final String LOGOUT_SHRT = "lgu";
 
     // команды для тестов и отладки программы
     private static final String GET_REPO_CMD = "get-rep";
@@ -122,13 +94,11 @@ public class KeyboardCommandHandler {
     // Эти не обязательно
     // exit -> ex
     // help -> hlp
-    // на случай желания замены части комманды, не надо будет переписывать все комманды.
-
-
-    // todo: добавить сокращения коммандам
     // сокращенные комманды:
     private static final String HELP_CMD_SRT = HELP_SHRT;
     private static final String EXIT_CMD_SRT = EXIT_SHRT;
+    private static final String LOGIN_CMD_SRT = LOGIN_SHRT;
+    private static final String LOGOUT_CMD_SRT = LOGOUT_SHRT;
     private static final String LOCAL_FILE_LIST_CMD_SRT = LOCAL_SHRT + PREFIX + FILE_SHRT + PREFIX + LIST_SHRT;
     private static final String LOCAL_FILE_EXISTS_CMD_SRT = LOCAL_SHRT + PREFIX + FILE_SHRT + PREFIX + EXISTS_SHRT;
     private static final String LOCAL_FOLDER_LIST_CMD_SRT = LOCAL_SHRT + PREFIX + FOLDER_SHRT + PREFIX + LIST_SHRT;
@@ -162,12 +132,21 @@ public class KeyboardCommandHandler {
     private Event<KeyboardCommandEvent> keyboardCommandEvent;
 
     public void observe(@Observes final KeyboardCommandEvent event) {
+        boolean hasName = true;
         System.out.println("\ncmd:");
         final Scanner scanner = new Scanner(System.in);
-        String command = scanner.next();// nextLine() вместо next(), чтобы была возможность реализовать функионал
-        // создания запроса с доп. параметрами(например имя).
-        //todo: создать switch, в котором, все методы будут вызываться, используя константы
-        switch (command) {
+        String command = scanner.nextLine();
+        String[] words = command.split(" ");
+        String name = "";
+        if (words.length == 1) hasName = false;
+        else if (words.length == 2) name = words[1];
+        else {
+            System.out.println("\"" + words[0] + "\" не является коммандой, используемой данным приложением");
+            keyboardCommandEvent.fire(new KeyboardCommandEvent());
+            return;
+        }
+        //todo: создать switch, в котором, все доступные методы
+        switch (words[0]) {
             case HELP_CMD:
                 printHelp();
                 break;
@@ -183,26 +162,35 @@ public class KeyboardCommandHandler {
             case EXIT_CMD_SRT:
                 appService.shutdown();
                 break;
-            // todo: добавить сокр. для login и logout
             case LOGIN_CMD:
+                appService.login();
+                break;
+            case LOGIN_CMD_SRT:
                 appService.login();
                 break;
             case LOGOUT_CMD:
                 appService.logout();
                 break;
+            case LOGOUT_CMD_SRT:
+                appService.logout();
+                break;
 
             // local/remote file add commands
             case LOCAL_FILE_ADD_CMD:
-                addFile(0);
+                if (hasName)
+                    fileLocalService.createRootFile(name, "empty");
                 break;
             case LOCAL_FILE_ADD_CMD_SRT:
-                addFile(0);
+                if (hasName)
+                    fileLocalService.createRootFile(name, "empty");
                 break;
             case REMOTE_FILE_ADD_CMD:
-                addFile(1);
+                if (hasName)
+                    fileRemoteService.createRootFile(name, "empty");
                 break;
             case REMOTE_FILE_ADD_CMD_SRT:
-                addFile(1);
+                if (hasName)
+                    fileRemoteService.createRootFile(name, "empty");
                 break;
             // folder add, delete, exists,list commands
             // local
@@ -213,22 +201,28 @@ public class KeyboardCommandHandler {
                 folderLocalService.getListNamesRoot();
                 break;
             case LOCAL_FOLDER_ADD_CMD:
-                localFolderServiceCmd(0);
+                if (hasName)
+                    folderLocalService.createFolder(name);
                 break;
             case LOCAL_FOLDER_ADD_CMD_SRT:
-                localFolderServiceCmd(0);
+                if (hasName)
+                    folderLocalService.createFolder(name);
                 break;
             case LOCAL_FOLDER_DELETE_CMD:
-                localFolderServiceCmd(1);
+                if (hasName)
+                    folderLocalService.deleteFolder(name);
                 break;
             case LOCAL_FOLDER_DELETE_CMD_SRT:
-                localFolderServiceCmd(1);
+                if (hasName)
+                    folderLocalService.deleteFolder(name);
                 break;
             case LOCAL_FOLDER_EXISTS_CMD:
-                localFolderServiceCmd(2);
+                if (hasName)
+                    System.out.println("папку с именем \"" + name + ((fileLocalService.exists(name)) ? "\" " : "\"не ") + "удалось найти");
                 break;
             case LOCAL_FOLDER_EXISTS_CMD_SRT:
-                localFolderServiceCmd(2);
+                if (hasName)
+                    System.out.println("папку с именем \"" + name + ((fileLocalService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
                 break;
             //remote
             // todo: закончить реализацию remoteServices
@@ -238,7 +232,16 @@ public class KeyboardCommandHandler {
             case REMOTE_FOLDER_LIST_CMD_SRT:
                 folderRemoteService.getListNamesRoot();
                 break;
+            case REMOTE_FOLDER_EXISTS_CMD:
+                if(hasName)
+                    System.out.println("файл с именем \"" + name + ((folderRemoteService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
+                break;
+            case REMOTE_FOLDER_EXISTS_CMD_SRT:
+                if(hasName)
+                    System.out.println("файл с именем \"" + name + ((folderRemoteService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
+                break;
             // file delete, exists, list commands
+            //local
             case LOCAL_FILE_LIST_CMD:
                 fileLocalService.getRootFiles();
                 break;
@@ -246,16 +249,34 @@ public class KeyboardCommandHandler {
                 fileLocalService.getRootFiles();
                 break;
             case LOCAL_FILE_DELETE_CMD:
-                localFileServiceCmd(0);
+                if (hasName)
+                fileLocalService.remove(name);
                 break;
             case LOCAL_FILE_DELETE_CMD_SRT:
-                localFileServiceCmd(0);
+                if (hasName)
+                fileLocalService.remove(name);
                 break;
             case LOCAL_FILE_EXISTS_CMD:
-                localFileServiceCmd(1);
+                if (hasName)
+                    System.out.println("файл с именем \"" + name + ((fileLocalService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
                 break;
             case LOCAL_FILE_EXISTS_CMD_SRT:
-                localFileServiceCmd(1);
+                System.out.println("файл с именем \"" + name + ((fileLocalService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
+                break;
+            //remote
+            case REMOTE_FILE_LIST_CMD:
+                fileRemoteService.getRootFiles();
+                break;
+            case REMOTE_FILE_LIST_CMD_SRT:
+                fileRemoteService.getRootFiles();
+                break;
+            case REMOTE_FILE_EXISTS_CMD:
+                if (hasName)
+                    System.out.println("файл с именем \"" + name + ((fileRemoteService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
+                break;
+            case REMOTE_FILE_EXISTS_CMD_SRT:
+                if (hasName)
+                    System.out.println("файл с именем \"" + name + ((fileRemoteService.exists(name)) ? "\" " : "\" не ") + "удалось найти");
                 break;
             case GET_REPO_CMD:
                 System.out.println(appService.repository());
@@ -263,74 +284,14 @@ public class KeyboardCommandHandler {
             case GET_SESSION_CMD:
                 System.out.println(appService.session());
                 break;
+
             default:
                 System.out.println("Команда не опознана");
         }
         keyboardCommandEvent.fire(new KeyboardCommandEvent());
     }
 
-
-    private void addFile(int i) {
-        Scanner scr = new Scanner(System.in);
-        System.out.println("Enter file\'s name");
-        String name = scr.next();
-        System.out.println("Enter file\'s data");
-        scr.nextLine();
-        String data = scr.nextLine();
-        switch (i) {
-            case 0:
-                fileLocalService.createRootFile(name, data);
-                break;
-            case 1:
-                fileRemoteService.createRootFile(name, data);
-                break;
-            default:
-                System.out.println("System error.");
-        }
-    }
-
-    // TODO: реализовать функционал, при котором, сразу после комманды можно было бы писать имя файла
-    private void localFileServiceCmd(int i) {
-        Scanner scr = new Scanner(System.in);
-        System.out.println("Enter file/folder\'s name");
-        String name = scr.next();
-        switch (i) {
-            case 0:
-                fileLocalService.remove(name);
-                break;
-            case 1:
-                System.out.println(fileLocalService.exists(name));
-                break;
-            default:
-                System.out.println("Системная ошибка.");
-
-        }
-
-    }
-
-    private void localFolderServiceCmd(int i) {
-        Scanner scr = new Scanner(System.in);
-        System.out.println("Enter file/folder\'s name");
-        String name = scr.next();
-        switch (i) {
-            case 0:
-                folderLocalService.createFolder(name);
-                break;
-            case 1:
-                folderLocalService.deleteFolder(name);
-                break;
-            case 2:
-                System.out.println(folderLocalService.exists(name));
-                break;
-            default:
-                System.out.println("Системная ошибка.");
-
-        }
-
-    }
-
     private void printHelp() {
-        System.out.println("//////////////////////////////////////////////////////////");
         System.out.println(HELP_CMD + " - команда вызова списка команд и их описания");
         System.out.println(ABBREVIATIONS_CMD + "- команда вывода списка стандартных сокращений отдельных частей комманд");
         System.out.println(EXIT_CMD + " - команда выхода из приложения");

@@ -43,9 +43,13 @@ public class FolderLocalServiceBean implements FolderLocalService {
 
     @Override
     public void getListNamesRoot() {
-        for (String folderName :getListFolderName() ) {
+        List<String> names = getListFolderName();
+        if(names.size() ==0){ System.out.println("---EMPTY---"); return;}
+        System.out.println("---");
+        for (String folderName :names) {
             System.out.println(folderName);
         }
+        System.out.println("---");
     }
 
     @Override

@@ -7,6 +7,15 @@
     <groupId>ru.timokhin</groupId>
     <artifactId>artifact</artifactId>
     <version>1.0.0</version>
+
+    <developers>
+        <developer>
+            <name>Александр Тимохин</name>
+            <id>1</id>
+            <email>adtimokhin@gmail.com</email>
+        </developer>
+    </developers>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

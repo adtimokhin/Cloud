@@ -48,7 +48,8 @@ public class AppServiceBean implements AppService {
     @Override
     public boolean logout() {
         try {
-            session.logout();
+//            session.logout();
+            session = null;// не уверен, что лучше оставить
             return true;
         } catch (Exception e) {
             error = e;
@@ -61,14 +62,6 @@ public class AppServiceBean implements AppService {
     public boolean status() {
         if(repository == null)return false;
         if(session == null)return false;
-//        try{
-//            repository = null;
-//            session = null;
-//            return true;
-//        }catch (Exception e){
-//            error = e;
-//            return false;
-//        }
         return true;
     }
 

@@ -18,7 +18,7 @@ public class KeyboardInitHandler {
     public void observe(@Observes final KeyboardInitEvent event){
         System.out.println();
         System.out.println("WELCOME TO COMMAND LINE INTERFACE");
-        System.out.println("FOR LIST OF COMMANDS ENTER COMMAND \"help\"");
+        System.out.println("FOR LIST OF COMMANDS ENTER COMMAND \"help\" or \"hlp\"");
         keyboardCommandEvent.fire(new KeyboardCommandEvent());
     }
 }

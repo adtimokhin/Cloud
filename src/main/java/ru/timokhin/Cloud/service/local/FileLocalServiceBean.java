@@ -106,9 +106,13 @@ public class FileLocalServiceBean implements FileLocalService {
 
     @Override
     public void getRootFiles() {
-        for (String name:getListNameFiles()) {
-            System.out.println(name);
+        List<String> names = getListNameFiles();
+        if(names.size() ==0){ System.out.println("---EMPTY---"); return;}
+        System.out.println("---");
+        for (String fileName :names) {
+            System.out.println(fileName);
         }
+        System.out.println("---");
     }
 
 
